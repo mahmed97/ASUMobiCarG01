@@ -1,5 +1,5 @@
 #include<SoftwareSerial.h>
-SoftwareSerial BT(3,2);
+SoftwareSerial BT(2,3);
 #define RMS 10
 #define LMS 11
 int MPin[4]={6,7,8,9};
@@ -78,7 +78,6 @@ else if (Cfra==0&&Rfra==0&&Lfra==1||Cfra==1&&Rfra==0&&Lfra==1){right();x=1;}
 else if (Cfra==0&&Rfra==1&&Lfra==0||Cfra==1&&Rfra==1&&Lfra==0){left();y=1;}
 else if(Cfra==0&&Rfra==0&&Lfra==0){STOP();}
 else if(Cfra==1&&Rfra==1&&Lfra==1){if(x==1){right();} else if(y==1){left();} else if(z==1){forward();}}
- Serial.println(Cfra);
   char input = BT.read();
 switch(input){
     case'F':forward();break;
@@ -93,4 +92,5 @@ switch(input){
 
 
 }
+if(BT.available()) Serial.println(input); 
   }
