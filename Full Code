@@ -1,0 +1,195 @@
+#include <SoftwareSerial.h> 
+SoftwareSerial BT(2,3);
+#define RMS 10
+#define LMS 11
+int MPin[4]={6,7,8,9};
+int x,y,z,i=0,j=0,k=0;
+// Ultrasonic
+const int trigPin = 4;
+const int echoPin = 5;
+long duration;
+int dism,mdis,dis,mtim=1,rtim=0,Wcou=0,Wrd,Wang,Wcar,q,Q,Wco;
+float Wdis;
+char input,ff='k';
+double reff,distance,adis;
+void setup() {  
+ BT.begin(9600);
+ Serial.begin(9600);
+ pinMode(6,OUTPUT);
+ pinMode(7,OUTPUT);
+ pinMode(8,OUTPUT);
+ pinMode(9,OUTPUT);
+ pinMode(12,INPUT);
+ pinMode(A3,INPUT);
+ pinMode(A4,INPUT);
+ pinMode(A5,INPUT);
+ pinMode(trigPin, OUTPUT); 
+ pinMode(echoPin, INPUT); 
+}
+void motors(int Volt[4]){
+  for (int x=0;x<4;x++){
+    digitalWrite(MPin[x],Volt[x]);
+    }
+  }
+void forward(){
+int F[4]={0,1,0,1};
+analogWrite(RMS,255);
+analogWrite(LMS,255);
+motors(F);
+}
+void backward(){
+int B[4]={1,0,1,0};
+motors(B);
+}
+void right(){
+  int R[4]={1,0,0,1};
+
+motors(R);
+}
+void left(){
+int L[4]={0,1,1,0};
+
+motors(L);
+}
+void forwardR(){
+int FR[4]={1,0,1,0};
+analogWrite(RMS,255);
+analogWrite(LMS,100);
+motors(FR);
+}
+void forwardL(){
+int FL[4]={1,0,1,0};
+analogWrite(RMS,100);
+analogWrite(LMS,255);
+motors(FL);
+}
+void backwardR(){
+int BR[4]={0,1,0,1};
+analogWrite(RMS,255);
+analogWrite(LMS,100);
+motors(BR);
+}
+void backwardL(){
+int BL[4]={0,1,0,1};
+analogWrite(RMS,100);
+analogWrite(LMS,255);
+motors(BL);
+}
+void STOP(){
+int S[4]={0,0,0,0};
+motors(S);
+}
+
+void loop() {
+  Wrd=Wcar;
+  //Ultrasonic ////////////////////////////////////////////////////////
+digitalWrite(trigPin, LOW);
+delayMicroseconds(2);
+digitalWrite(trigPin, HIGH);
+delayMicroseconds(10);
+digitalWrite(trigPin, LOW);
+duration = pulseIn(echoPin, HIGH);
+distance= duration*0.034/2;
+// Line Tracker /////////////////////////
+  int Rfra=digitalRead(A3);
+  int Wcar=digitalRead(12);
+  int Cfra=digitalRead(A4);
+ int Lfra=digitalRead(A5);
+char xdim,ydim,zdim;
+
+while (j==2){
+  if (Cfra==0&&Rfra==1&&Lfra==1){forward();z=1;}
+else if (Cfra==0&&Rfra==0&&Lfra==1||Cfra==1&&Rfra==0&&Lfra==1){right();x=1;}
+else if (Cfra==0&&Rfra==1&&Lfra==0||Cfra==1&&Rfra==1&&Lfra==0){left();y=1;}
+else if(Cfra==0&&Rfra==0&&Lfra==0){forward();}
+else if(Cfra==1&&Rfra==1&&Lfra==1){if(x==1)right(); else if(y==1)left();}
+
+break;
+}
+/////////////////////////////////////////////////////
+char NUM[10]={0,1,2,3,4,5,6,7,8,9};
+  char input = BT.read();
+  if(input=='m')j=0;
+  while(j==0){
+switch(input){
+    case'F':forward();break;
+    case'B':backward();break;
+    case'R':right();break;
+    case'L':left();break;
+    case'S':STOP();break;
+    case'I':forwardR();break;
+    case'G':forwardL();break;
+    case'J':backwardR();break;
+    case'H':backwardL();break;
+}
+break;
+  }
+if(input=='M') {j=1; dis=distance;}
+while (j==1){
+
+adis=mdis*3.14/180;
+reff=dis/cos(adis);
+
+  if(input=='F'){forward();}
+  if(distance==dis-mdis){STOP(); ff='f';}
+break;
+}
+if(input=='W')j=3;
+while (j==3){
+    /* if (input=='X')i++;
+if (input=='Y')k+=10;
+mdis=i+k;
+  mtim=(mdis)/0.043;
+  if(input=='F'){forward();delay(mtim);STOP();}
+  if(input=='B'){backward();delay(mtim);STOP();}
+  if(input=='S')STOP();
+  rtim=mdis/15;
+    if(input=='R'){right();delay(rtim);STOP();}
+  if(input=='L'){left();delay(rtim);STOP();} */
+ if (input=='X')i++;
+ if (input=='Y')k+=10;
+ mdis=i+k;
+ // calc //////////////////////////////
+  if(Wcar==0)q=1;
+  if(Wcar==1)Q=1,q=0;
+  if(q==1){if(Q==1){Wcou++;q=0;Q=0;}}
+   if(Wcar==0)q=1;
+  if(Wcar==1)Q=1,q=0;
+  if(q==1){if(Q==1){Wcou++;q=0;Q=0;}}
+  Wco=Wcou-1;
+  Wdis=mdis-2.5*Wcou;
+  Wang=mdis-12.9*Wcou;
+  //////////////////////////////////
+  //////////////////////////////////
+    if(input=='R')right();
+  if(input=='L')left();
+  if(Wang<=0)STOP();
+  break;
+  }
+if(input=='n')j=0;
+if(input=='N')j=2;
+if(input=='w')j=4;
+while(j==4){
+ if (input=='X')i++;
+ if (input=='Y')k+=10;
+ mdis=i+k;
+ // calc //////////////////////////////
+  if(Wcar==0)q=1;
+  if(Wcar==1)Q=1,q=0;
+  if(q==1){if(Q==1){Wcou++;q=0;Q=0;}}
+   if(Wcar==0)q=1;
+  if(Wcar==1)Q=1,q=0;
+  if(q==1){if(Q==1){Wcou++;q=0;Q=0;}}
+  Wco=Wcou-1;
+  Wdis=mdis-2.5*Wcou;
+  Wang=mdis-12.9*Wcou;
+  //////////////////////////////////
+ if(input=='F')forward();
+ if(Wdis<=0)STOP();
+ if(input=='B')backward();
+break;
+}
+if(BT.available())Serial.println(input);
+Serial.println(j);
+
+  }
