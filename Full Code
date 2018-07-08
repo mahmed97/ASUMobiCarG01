@@ -90,6 +90,7 @@ delayMicroseconds(10);
 digitalWrite(trigPin, LOW);
 duration = pulseIn(echoPin, HIGH);
 distance= duration*0.034/2;
+if (distance<=12)STOP();
 // Line Tracker /////////////////////////
   int Rfra=digitalRead(A3);
   int Wcar=digitalRead(12);
